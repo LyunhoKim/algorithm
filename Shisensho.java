@@ -10,11 +10,13 @@ public class Main {
 	static final int PATH_TYPE_SAME_ROW = 1;
 	static final int PATH_TYPE_SAME_COL = 2;
 	static final int PATH_TYPE_OTHER = 3;
+	
+	static char [][] board;
 
 	public static void main(String[] args) throws FileNotFoundException {
 		
-//		Scanner scanner = new Scanner(System.in);
-		Scanner scanner = new Scanner(new FileInputStream("src/testcase.txt"));
+		Scanner scanner = new Scanner(System.in);
+//		Scanner scanner = new Scanner(new FileInputStream("src/testcase.txt"));
 		int T = Integer.parseInt(scanner.nextLine());
 		
 		
@@ -24,7 +26,7 @@ public class Main {
 			int nCol = Integer.parseInt(boardSize[1]);
 			int cntVaildPath = 0;
 			
-			char [][] board = new char [nRow][nCol];
+			board = new char [nRow][nCol];
 			ArrayList<Point> pointList = new ArrayList<Point>();
 			
 			// 2차원 배열 입력  
@@ -47,8 +49,10 @@ public class Main {
 					if(Point.getPathType(p1, p2) == PATH_TYPE_SAME_ROW) {
 						
 						// 직진 경로 확인 (가로 방향) 
-						if(isValidLandscapeDirectoly(p1, p2, board) || isPossiblePathWith2Turn(p1, p2, board))
+						if(isValidLandscapeDirectoly(p1, p2) || isPossiblePathWith2Turn(p1, p2)) {
 							cntVaildPath++;
+//							System.out.println("SAME ROW:" + p1.tile + ", (" + p1.x + "," + p1.y + "), (" + p2.x  + "," + p2.y + ")");
+						}
 						
 						
 						
@@ -57,15 +61,19 @@ public class Main {
 						
 						
 						// 직진 경로 확인 (세로 방향) 
-						if(isValidPortraitDirectly(p1, p2, board) || isPossiblePathWith2Turn(p1, p2, board))
+						if(isValidPortraitDirectly(p1, p2) || isPossiblePathWith2Turn(p1, p2)) {
 							cntVaildPath++;
+//							System.out.println("SAME COL:" + p1.tile + ", (" + p1.x + "," + p1.y + "), (" + p2.x  + "," + p2.y + ")");
+						}
 						
 						
 					//1번 꺾이는 경로 or 2번 꺾이는 경로 
 					} else {
 						
-						if(isPossiblePathWith1Turn(p1, p2, board) || isPossiblePathWith2Turn(p1, p2, board))
+						if(isPossiblePathWith1Turn(p1, p2) || isPossiblePathWith2Turn(p1, p2)) {
 							cntVaildPath++;
+//							System.out.println("OTHER POINT:" + p1.tile + ", (" + p1.x + "," + p1.y + "), (" + p2.x  + "," + p2.y + ")");
+						}
 						
 					}
  				}
@@ -77,7 +85,7 @@ public class Main {
 		}
 	}
 	
-	private static boolean isValidLandscapeDirectoly(Point p1, Point p2, char [][] board) {
+	private static boolean isValidLandscapeDirectoly(Point p1, Point p2) {
 		int x = p1.x;
 		if(p1.y > p2.y) {
 			Point t = p1;
@@ -93,7 +101,7 @@ public class Main {
 		
 	}
 	
-	private static boolean isValidPortraitDirectly(Point p1, Point p2, char [][] board) {
+	private static boolean isValidPortraitDirectly(Point p1, Point p2) {
 		int y = p1.y;
 		if(p1.x > p2.x) {
 			Point t = p1;
@@ -107,19 +115,19 @@ public class Main {
 		return true;
 	}
 	
-	private static boolean isPossiblePathWith1Turn(Point p1, Point p2, char [][]  board) {
+	private static boolean isPossiblePathWith1Turn(Point p1, Point p2) {
 		//1번 꺾임 경로
 		Point t1 = new Point(p1.tile, p1.x, p2.y);
-		Point t2 = new Point(p1.tile, p2.x, p1.x);
+		Point t2 = new Point(p1.tile, p2.x, p1.y);
 		
-		if( (isValidLandscapeDirectoly(p1, t1, board) && isValidPortraitDirectly(t1, p2, board) && board[t1.x][t1.y] == '.') ||
-			(isValidPortraitDirectly(p1, t2, board) && isValidLandscapeDirectoly(t2, p2, board) && board[t2.x][t2.y] == '.') ) 
+		if( (isValidLandscapeDirectoly(p1, t1) && isValidPortraitDirectly(t1, p2) && board[t1.x][t1.y] == '.') ||
+			(isValidPortraitDirectly(p1, t2) && isValidLandscapeDirectoly(t2, p2) && board[t2.x][t2.y] == '.') ) 
 			return true;
 		return false;
 		
 	}
 	
-	private static boolean isPossiblePathWith2Turn(Point p1, Point p2, char [][] board) {
+	private static boolean isPossiblePathWith2Turn(Point p1, Point p2) {
 		Point t1;
 		Point t2;
 		
@@ -127,36 +135,47 @@ public class Main {
 		int nRow = board.length;
 		
 		//우
-		for(int c=nCol-1; c>p1.y && c>p2.y; c-- ) {
+		for(int c=(p1.y < p2.y ? p2.y:p1.y)+1; c<nCol; c++ )  {
 			t1 = new Point(p1.tile, p1.x, c);
 			t2 = new Point(p1.tile, p2.x, c);
 			
-			if(isValidLandscapeDirectoly(p1, t1, board) && isValidLandscapeDirectoly(p2, t2, board) && isValidPortraitDirectly(t1, t2, board) && board[t1.x][t1.y] == '.' && board[t2.x][t2.y] == '.')  
+			if(board[t1.x][t1.y] != '.' || board[t2.x][t2.y] != '.')
+				break;
+			if(isValidLandscapeDirectoly(p1, t1) && isValidLandscapeDirectoly(p2, t2) && isValidPortraitDirectly(t1, t2) )  
 				return true;
 		}
 		
 		//좌
-		for(int c=0; c<p1.y&& c<p2.y; c++) {
+		for(int c=(p1.y < p2.y ? p1.y:p2.y)-1; 0<=c; c--) {
 			t1 = new Point(p1.x, c);
 			t2 = new Point(p2.x, c);
-			if(isValidLandscapeDirectoly(p1, t1, board) && isValidLandscapeDirectoly(p2, t2, board) && isValidPortraitDirectly(t1, t2, board) && board[t1.x][t1.y] == '.' && board[t2.x][t2.y] == '.') 
+			
+			if(board[t1.x][t1.y] != '.' || board[t2.x][t2.y] != '.')
+				break;
+			if(isValidLandscapeDirectoly(p1, t1) && isValidLandscapeDirectoly(p2, t2) && isValidPortraitDirectly(t1, t2)) 
 				return true;
 		}
 			
 		
 		//상
-		for(int r=0; r<p1.x && r<p2.x; r++) {
-			t1 = new Point(0, p1.y);
-			t2 = new Point(0, p2.y);
-			if(isValidPortraitDirectly(p1, t1, board) && isValidPortraitDirectly(p2, t2, board) && isValidLandscapeDirectoly(t1, t2, board) && board[t1.x][t1.y] == '.' && board[t2.x][t2.y] == '.')
+		for(int r=(p1.x < p2.x ? p1.x:p2.x)-1; 0<=r; r--) {
+			t1 = new Point(r, p1.y);
+			t2 = new Point(r, p2.y);
+			
+			if(board[t1.x][t1.y] != '.' || board[t2.x][t2.y] != '.')
+				break;
+			if(isValidPortraitDirectly(p1, t1) && isValidPortraitDirectly(p2, t2) && isValidLandscapeDirectoly(t1, t2))
 				return true;
 		}
 		
 		//하
-		for(int r=nRow-1; r>p1.x && r>p2.x; r--) {
-			t1 = new Point(nRow-1, p1.y);
-			t2 = new Point(nRow-1, p2.y);
-			if(isValidPortraitDirectly(p1, t1, board) && isValidPortraitDirectly(p2, t2, board) && isValidLandscapeDirectoly(t1, t2, board) && board[t1.x][t1.y] == '.' && board[t2.x][t2.y] == '.')
+		for(int r=(p1.x < p2.x ? p2.x:p1.x)+1; r<nRow; r++) {
+			t1 = new Point(r, p1.y);
+			t2 = new Point(r, p2.y);
+			
+			if(board[t1.x][t1.y] != '.' || board[t2.x][t2.y] != '.')
+				break;
+			if(isValidPortraitDirectly(p1, t1) && isValidPortraitDirectly(p2, t2) && isValidLandscapeDirectoly(t1, t2))
 				return true;
 		}
 		
@@ -170,7 +189,10 @@ public class Main {
 		for(int c=p1.y+1; c<p2.y; c++) {
 			t1 = new Point(p1.x, c);
 			t2 = new Point(p2.x, c);
-			if(isValidLandscapeDirectoly(p1, t1, board) && isValidPortraitDirectly(t1, t2, board) && isValidLandscapeDirectoly(t2, p2, board) && board[t1.x][t1.y] == '.' && board[t2.x][t2.y] == '.' )
+			
+			if(board[t1.x][t1.y] != '.' || board[t2.x][t2.y] != '.')
+				continue;
+			if(isValidLandscapeDirectoly(p1, t1) && isValidPortraitDirectly(t1, t2) && isValidLandscapeDirectoly(t2, p2))
 				return true;
 		}
 		
@@ -183,7 +205,9 @@ public class Main {
 		for(int r=p1.x+1; r<p2.x; r++) {
 			t1 = new Point(r, p1.y);
 			t2 = new Point(r, p2.y);
-			if(isValidPortraitDirectly(p1, t1, board) && isValidLandscapeDirectoly(t1, t2, board) && isValidPortraitDirectly(t2, p2, board) && board[t1.x][t1.y] == '.' && board[t2.x][t2.y] == '.' )
+			if(board[t1.x][t1.y] != '.' || board[t2.x][t2.y] != '.' )
+				continue;
+			if(isValidPortraitDirectly(p1, t1) && isValidLandscapeDirectoly(t1, t2) && isValidPortraitDirectly(t2, p2))
 				return true;
 		}
 		return false;
