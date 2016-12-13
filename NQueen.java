@@ -17,6 +17,7 @@ public class Main {
 			table = new int [tableSize][tableSize];
 			init();
 			
+			// 첫번째 행부터 시작 
 			findNQueen(0);
 			
 			System.out.println(cntPossibleQueen);
@@ -40,8 +41,10 @@ public class Main {
 			
 		
 		for(int i=0; i<tableSize; i++) {
+			// 해당 열의 이전 Queen 위치 삭제 
 			clearBoardRow(depth);
 			if(isPossiblePosition(depth, i)) {
+				// Queen 위치 표시 
 				table[depth][i] = 1; 
 				findNQueen(depth+1);
 			}
