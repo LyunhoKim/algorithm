@@ -16,33 +16,22 @@ public class Main {
 		int T = sc.nextInt();
 		
 		while(T-- > 0) {
-			N = sc.nextInt();
-			D = new int [N*2-1][N+1];
-			
 			int i=0, j=0;
+			N = sc.nextInt();
+			D = new int [N*2-1][N+1]; // 0번째 열 비워두기 위해 
 			
-			for(i=0; i<N*2-1; i++) {
-				for(j=0; j<N; j++) {
-					D[i][j] = 0;
-				}
-			}
-			
+			// 꼭대기 값 
 			D[0][1] = sc.nextInt();
 			
-			for(i=1; i<N; i++) {
-				for(j=0+1; j<=i+1; j++){
-					D[i][j] = sc.nextInt();
-					D[i][j] = D[i][j] + Math.max(D[i-1][j-1], D[i-1][j]);
-				}
-			}
+			// 상단 
+			for(i=1; i<N; i++) 
+				for(j=0+1; j<=i+1; j++)
+					D[i][j] = sc.nextInt() + Math.max(D[i-1][j-1], D[i-1][j]);
 			
-			for(i=N; i<2*N-1; i++) {
-				for(j=1; 2*N-i>j; j++) {
-					D[i][j] = sc.nextInt();
-					D[i][j] = D[i][j] + Math.max(D[i-1][j], D[i-1][j+1]);
-				}
-			}
-			
+			// 하단 
+			for(i=N; i<2*N-1; i++) 
+				for(j=1; 2*N-i>j; j++) 
+					D[i][j] = sc.nextInt() + Math.max(D[i-1][j], D[i-1][j+1]);
 			
 			System.out.println(D[i-1][j-1]);
 					
